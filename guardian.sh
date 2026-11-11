@@ -99,15 +99,39 @@ launch_mrchromebox() {
   pause
 }
 
-password_guide() {
+set_vt2_password() {
   echo
-  echo "========== UEFI PASSWORD GUIDE =========="
-  echo "1. Restart and repeatedly press ESC at the firmware splash screen."
-  echo "2. Open Device Manager > System Setup > Security Configuration."
-  echo "3. Look for Setup Administrator Password or User Password Management."
-  echo "Follow the firmware prompts. Options vary by firmware and device."
-  echo "Guardian does not set, read, verify, or remove firmware passwords."
-  echo "Keep your password somewhere secure; losing it may prevent setup access."
+  echo "========== VT-2 DEVELOPER PASSWORD =========="
+  echo "This uses ChromeOS's built-in chromeos-setdevpasswd utility."
+  echo "It sets or changes the Developer Mode password used for VT-2 login"
+  echo "and authentication for sudo."
+  echo
+  if ! command -v chromeos-setdevpasswd >/dev/null 2>&1; then
+    echo "ERROR: chromeos-setdevpasswd is not available on this ChromeOS image."
+    pause
+    return
+  fi
+  if ! command -v sudo >/dev/null 2>&1; then
+    echo "ERROR: sudo is not available."
+    pause
+    return
+  fi
+  echo "You will be prompted to enter and confirm a new password."
+  echo "Do not reuse a password from another account."
+  read -r -p "Continue? [y/N]: " answer
+  case "$answer" in
+    y|Y|yes|YES) ;;
+    *) echo "Cancelled."; pause; return ;;
+  esac
+  sudo chromeos-setdevpasswd
+  status=$?
+  echo
+  if [ "$status" -eq 0 ]; then
+    echo "The password utility finished. Test VT-2 login before relying on it."
+    echo "This does not block the Crosh 'shell' command itself."
+  else
+    echo "The password utility reported an error (exit status $status)."
+  fi
   pause
 }
 
@@ -134,7 +158,7 @@ main_menu() {
     echo "  1. Device Information"
     echo "  2. USB Boot Protection"
     echo "  3. Launch MrChromebox Firmware Utility"
-    echo "  4. Administrator Password Guide"
+    echo "  4. Set / Change VT-2 Developer Password"
     echo "  5. Safety & Limitations"
     echo "  6. Exit"
     echo "=========================================="
@@ -144,7 +168,7 @@ main_menu() {
       1) show_device_info; pause ;;
       2) usb_boot_menu ;;
       3) launch_mrchromebox ;;
-      4) password_guide ;;
+      4) set_vt2_password ;;
       5) safety_information ;;
       6) echo "Chromebook Guardian closed."; exit 0 ;;
       *) echo "Invalid selection."; sleep 1 ;;
