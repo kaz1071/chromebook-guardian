@@ -178,7 +178,6 @@ main_menu() {
     echo "  4. Administrator Password Guide"
     echo "  5. Safety & Limitations"
     echo "  6. Exit"
-    echo
     echo "=========================================="
     echo
     read -r -p "Select an option [1-6]: " choice
