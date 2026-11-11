@@ -3,7 +3,7 @@
 # Owner-operated utility for ChromeOS devices in Developer Mode.
 
 set -u
-VERSION="1.2"
+VERSION="1.3"
 
 pause() {
   echo
