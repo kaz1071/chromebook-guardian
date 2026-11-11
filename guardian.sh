@@ -179,6 +179,8 @@ main_menu() {
     echo "  5. Safety & Limitations"
     echo "  6. Exit"
     echo
+    echo "=========================================="
+    echo
     read -r -p "Select an option [1-6]: " choice
     case "$choice" in
       1) show_device_info; pause ;;
