@@ -10,6 +10,10 @@ This is an interactive, local utility. It:
 - Reads the setting back and reports whether the change succeeded.
 - Provides the matching command to restore the previous value.
 
+## UEFI Boot Menu Protection
+
+See [UEFI Boot Menu Protection Guide](UEFI_BOOT_MENU_PROTECTION.md) for the manual Setup Administrator Password procedure in MrChromebox UEFI Full ROM. The owner reports verifying that it protects the ESC boot menu and USB boot selection on a Lenovo 100e Gen 2 AST. This is device/firmware-specific; Chromebook Guardian does not set, read, store, or transmit firmware passwords.
+
 ## Safety and limitations
 
 - This is not a firmware password, verified-boot policy, or tamper-proof lock. A user with physical access and Developer Mode/recovery access may be able to change device configuration.
