@@ -13,7 +13,7 @@ pause() {
 get_release_value() {
   local key="$1"
   if [ -r /etc/lsb-release ]; then
-    grep -E "^\${key}=" /etc/lsb-release 2>/dev/null | head -n1 | cut -d= -f2- | tr -d '"'
+    grep -E "^${key}=" /etc/lsb-release 2>/dev/null | head -n1 | cut -d= -f2- | tr -d '"'
   fi
 }
 
