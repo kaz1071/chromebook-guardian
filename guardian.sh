@@ -118,10 +118,10 @@ set_vt2_password() {
   fi
   echo "You will be prompted to enter and confirm a new password."
   echo "Do not reuse a password from another account."
-  read -r -p "Continue? [y/N]: " answer
+  read -r -p "Continue? [Y/n]: " answer
   case "$answer" in
-    y|Y|yes|YES) ;;
-    *) echo "Cancelled."; pause; return ;;
+    n|N|no|NO) ;;
+    *) echo "Starting Command..."; pause;
   esac
   sudo chromeos-setdevpasswd
   status=$?
