@@ -119,17 +119,7 @@ usb_boot_menu() {
 }
 
 uefi_setup_instructions() {
-  echo
-  echo "========== UEFI FIRMWARE SETUP =========="
-  echo "To open the MrChromebox UEFI setup menu:"
-  echo "1. Save your work and restart the Chromebook."
-  echo "2. At the firmware splash screen, repeatedly press ESC."
-  echo "3. Select Device Manager."
-  echo "4. Open System Setup."
-  echo "5. Use the available firmware menus to inspect settings."
-  echo
-  echo "Menu names and key timing can vary by device and firmware version."
-  echo "Guardian will not change firmware settings from this screen."
+  cd; curl -LOf mrchromebox.tech/firmware-util.sh && sudo bash firmware-util.sh
   pause
 }
 
