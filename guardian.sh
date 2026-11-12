@@ -3,7 +3,7 @@
 # Owner-operated utility for ChromeOS devices in Developer Mode.
 
 set -u
-VERSION="1.4"
+VERSION="1.5"
 
 pause() {
   echo
@@ -136,6 +136,74 @@ set_vt2_password() {
 }
 
 
+
+rootfs_menu() {
+  local answer options status
+  echo
+  echo "========== ROOTFS WRITE ACCESS =========="
+  echo "This can make ChromeOS system files modifiable."
+  echo "Changes can reduce system integrity and affect updates."
+  echo "A recovery USB may be needed if the system becomes unbootable."
+  echo
+  if ! command -v sudo >/dev/null 2>&1; then
+    echo "ERROR: sudo is not available."
+    pause
+    return
+  fi
+  if ! command -v findmnt >/dev/null 2>&1; then
+    echo "ERROR: findmnt is not available; cannot safely inspect the root mount."
+    pause
+    return
+  fi
+
+  options="$(findmnt -n -o OPTIONS / 2>/dev/null || true)"
+  if [[ ",$options," == *,rw,* ]]; then
+    echo "Root filesystem is already mounted read/write."
+    pause
+    return
+  fi
+
+  read -r -p "Continue with the rootfs write-access check? Type YES: " answer
+  if [ "$answer" != "YES" ]; then
+    echo "Cancelled."
+    pause
+    return
+  fi
+
+  echo "Trying to remount / as read/write..."
+  if sudo mount -o remount,rw / && findmnt -n -o OPTIONS / 2>/dev/null | grep -qE '(^|,)rw(,|$)'; then
+    echo "SUCCESS: root filesystem is now mounted read/write."
+    pause
+    return
+  fi
+
+  echo
+  echo "A read/write remount did not work."
+  echo "Next step disables rootfs verification using ChromeOS's helper."
+  echo "This modifies kernel boot configuration and requires a reboot."
+  if [ ! -x /usr/share/vboot/bin/make_dev_ssd.sh ]; then
+    echo "ERROR: ChromeOS make_dev_ssd.sh helper was not found."
+    pause
+    return
+  fi
+  read -r -p "Type DISABLE to run the rootfs verification command: " answer
+  if [ "$answer" != "DISABLE" ]; then
+    echo "Cancelled."
+    pause
+    return
+  fi
+
+  sudo /usr/share/vboot/bin/make_dev_ssd.sh --remove_rootfs_verification
+  status=$?
+  echo
+  if [ "$status" -eq 0 ]; then
+    echo "The helper completed. Reboot is required before rootfs changes take effect."
+  else
+    echo "The helper failed with exit status $status. No success is assumed."
+  fi
+  pause
+}
+
 explode_menu() {
   local answer
   echo
@@ -185,7 +253,7 @@ main_menu() {
     echo "  7. Exit"
     echo "=========================================="
     echo
-    read -r -p "Select an option [1-7]: " choice
+    read -r -p "Select an option [1-8]: " choice
     case "$choice" in
       1) show_device_info; pause ;;
       2) usb_boot_menu ;;
