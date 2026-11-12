@@ -265,9 +265,9 @@ main_menu() {
     echo "  2. USB Boot Protection"
     echo "  3. Launch MrChromebox Firmware Utility"
     echo "  4. Set / Change VT-2 Developer Password"
-    echo "  5. Safety & Limitations"
-    echo "  6. Disable Rootfs / Remount RW"
-    echo "  7. Explode"
+    echo "  5. Disable Rootfs / Remount RW"
+    echo "  6. Explode"
+    echo "  7. Safety & Limitations"
     echo "  8. Exit"
     echo "=========================================="
     echo
@@ -277,9 +277,9 @@ main_menu() {
       2) usb_boot_menu ;;
       3) launch_mrchromebox ;;
       4) set_vt2_password ;;
-      5) safety_information ;;
-      6) rootfs_menu ;;
-      7) explode_menu ;;
+      5) rootfs_menu ;;
+      6) explode_menu ;;
+      7) safety_information ;;
       8) echo "Chromebook Guardian closed."; exit 0 ;;
       *) echo "Invalid selection."; sleep 1 ;;
     esac
