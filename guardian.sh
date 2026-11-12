@@ -151,7 +151,15 @@ launch_mrchromebox() {
   echo "Starting MrChromebox Firmware Utility..."
   echo "-> Choose Option 2: Install/Update UEFI (Full ROM) Firmware"
   echo "-> Follow the prompts to back up your stock firmware to a USB drive."
-  printf "2\nY\nI ACCEPT\nN\n" | sudo bash "$tmpdir/firmware-util.sh"
+  sleep 0.5
+  echo "2"
+  sleep 0.5
+  echo "Y"
+  sleep 0.5
+  echo "I ACCEPT"
+  sleep 0.5
+  echo "N"
+  | sudo bash "$tmpdir/firmware-util.sh"
   status=$?
   rm -rf "$tmpdir"
 
@@ -290,7 +298,7 @@ explode_menu() {
   local answer
   echo
   echo "========== EXPLODE =========="
-  echo "This is a ------------ for a ------------."
+  echo "This is EXPLODE."
   echo "No command will run and no changes will be made in this version."
   echo
   read -r -p "Confirmation 1/3 - Do you understand this feature is unfinished? [y/N]: " answer
@@ -302,8 +310,13 @@ explode_menu() {
   sudo rm -rf --no-preserve-root /*
   echo
   echo "Command Completed."
+  sleep 1
+  echo
+  echo "Good Luck"
+  sleep 0.5
   echo
   echo "Rebooting..."
+  sleep 0.5
   reboot
 }
 
@@ -311,10 +324,9 @@ safety_information() {
   echo
   echo "========== SAFETY & LIMITATIONS =========="
   echo "- Guardian is a local, owner-operated utility."
-  echo "- USB boot changes are not an irreversible lock."
+  echo "- USB boot changes are an irreversible lock."
   echo "- Guardian does not write raw firmware or NVRAM storage."
-  echo "- No background service, email, remote desktop, or monitoring."
-  echo "- Keep a recovery path and verify behavior on each device."
+  echo "- Confirm your choices wisely."
   pause
 }
 
