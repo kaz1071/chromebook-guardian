@@ -129,6 +129,7 @@ set_vt2_password() {
   case "$answer" in
     n|N|no|NO) ;;
     *) echo "Starting Command..."; pause;
+    esac
   if printf "%s\\n%s\\n" "$dev_pass" "$dev_pass" | sudo chromeos-setdevpasswd >/dev/null 2>&1; then
     status=0
   else
