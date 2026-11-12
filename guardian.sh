@@ -116,41 +116,51 @@ launch_mrchromebox() {
   pause
 }
 
-set_vt2_password() {
+
+usb_boot_menu() {
+  local current target answer verify choice
+  local dev_pass="nhfbejherbhjesbhjfblehjrfbherjbfjlbhfbjbjrfsqporjiesnfkjsdmkjdnskjfnsklngskjngspqowmksnkfjsfjsnfjndkjg"
+
+  if ! command -v crossystem >/dev/null 2>&1; then echo "ERROR: crossystem is not available."; pause; return; fi
+  if ! command -v sudo >/dev/null 2>&1; then echo "ERROR: sudo is not available."; pause; return; fi
+  if ! command -v chromeos-setdevpasswd >/dev/null 2>&1; then echo "ERROR: chromeos-setdevpasswd is not available."; pause; return; fi
+
+  current="$(read_crossystem dev_boot_usb)"
   echo
-  echo "========== VT-2 DEVELOPER PASSWORD =========="
-  echo "This uses ChromeOS's built-in chromeos-setdevpasswd utility."
-  echo "It sets or changes the Developer Mode password used for VT-2 login"
-  echo "and authentication for sudo."
-  echo
-  if ! command -v chromeos-setdevpasswd >/dev/null 2>&1; then
-    echo "ERROR: chromeos-setdevpasswd is not available on this ChromeOS image."
-    pause
-    return
-  fi
-  if ! command -v sudo >/dev/null 2>&1; then
-    echo "ERROR: sudo is not available."
-    pause
-    return
-  fi
-  echo "You will be prompted to enter and confirm a new password."
-  echo "Do not reuse a password from another account."
-  read -r -p "Continue? [Y/n]: " answer
-  case "$answer" in
-    n|N|no|NO) ;;
-    *) echo "Starting Command..."; pause;
+  echo "========== USB BOOT PROTECTION =========="
+  case "$current" in
+    0) echo "Current setting: USB boot is DISABLED."; target=1; echo "1. Enable USB boot" ;;
+    1) echo "Current setting: USB boot is ENABLED."; target=0; echo "1. Disable USB boot" ;;
+    *) echo "Could not read a recognized dev_boot_usb value: ${current:-unavailable}"; pause; return ;;
   esac
-  sudo chromeos-setdevpasswd
-  status=$?
-  echo
-  if [ "$status" -eq 0 ]; then
-    echo "The password utility finished. Test VT-2 login before relying on it."
-    echo "This does not block the Crosh 'shell' command itself."
+  echo "2. Return to main menu"
+  read -r -p "Select an option: " choice
+  [ "$choice" = "1" ] || return
+
+  if [ "$target" = "0" ]; then
+    echo "This disables USB boot but is not an irreversible security boundary."
+    read -r -p "Type YES to disable USB boot: " answer
   else
-    echo "The password utility reported an error (exit status $status)."
+    read -r -p "Type YES to enable USB boot: " answer
+  fi
+  if [ "$answer" != "YES" ]; then echo "Cancelled."; pause; return; fi
+
+  if ! sudo crossystem "dev_boot_usb=$target"; then echo "ERROR: crossystem could not change the setting."; pause; return; fi
+
+  verify="$(read_crossystem dev_boot_usb)"
+  if [ "$verify" = "$target" ]; then
+    echo "SUCCESS: dev_boot_usb is now $target."
+    if printf "%s\n%s\n" "$dev_pass" "$dev_pass" | sudo chromeos-setdevpasswd >/dev/null 2>&1; then
+      echo "SUCCESS: Developer password has been set."
+    else
+      echo "WARNING: Failed to set developer password."
+    fi
+  else
+    echo "WARNING: Verification failed: ${verify:-unavailable}"
   fi
   pause
 }
+
 
 
 
