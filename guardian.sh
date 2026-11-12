@@ -90,31 +90,85 @@ usb_boot_menu() {
 
 
 launch_mrchromebox() {
-  local answer tmpdir status
+  local answer tmpdir status wp_status fw_type
   echo
-  echo "========== MRCHROMEBOX FIRMWARE UTILITY =========="
+  echo "========== MRCHROMEBOX FULL ROM UTILITY =========="
   echo "Downloads and launches the official script from https://mrchromebox.tech/."
-  echo "Firmware operations can change or erase device firmware."
-  read -r -p "Launch the official utility? [y/N]: " answer
+  echo "WARNING: Flashing UEFI Full ROM firmware permanently replaces ChromeOS."
+  read -r -p "Run pre-flight checks and launch the utility? [y/N]: " answer
   case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; pause; return ;; esac
-  if ! command -v curl >/dev/null 2>&1; then echo "ERROR: curl is not installed."; pause; return; fi
-  if ! command -v sudo >/dev/null 2>&1; then echo "ERROR: sudo is not available."; pause; return; fi
+
+  # 1. Verify required system tools
+  for cmd in curl sudo crossystem; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      echo "ERROR: $cmd is not installed or not in PATH."
+      pause
+      return
+    fi
+  done
+
+  # 2. Verify non-root execution (running directly as root breaks MrChromebox paths)
+  if [ "$(id -u)" -eq 0 ]; then
+    echo "ERROR: Do not run this script directly as root. Log in as 'chronos' and let the script use sudo."
+    pause
+    return
+  fi
+
+  # 3. Verify Hardware Write Protection (WP) is disabled
+  wp_status="$(crossystem wpsw_cur 2>/dev/null)"
+  if [ "$wp_status" != "0" ]; then
+    echo "ERROR: Hardware Write Protection is ENABLED (wpsw_cur=${wp_status:-unknown})."
+    echo "You cannot flash Full ROM firmware until Hardware WP is disabled."
+    pause
+    return
+  fi
+  echo "OK: Hardware Write Protection is disabled."
+
+  # 4. Create temp directory and download script (with fallback for expired ChromeOS SSL certs)
   tmpdir="$(mktemp -d)" || { echo "ERROR: Could not create temporary directory."; pause; return; }
   echo "Downloading the official MrChromebox script..."
   if ! curl -fL --retry 2 -o "$tmpdir/firmware-util.sh" https://mrchromebox.tech/firmware-util.sh; then
-    echo "ERROR: Download failed. Check your internet connection."
+    echo "WARNING: Standard SSL download failed, retrying with -k (expired CrOS certs)..."
+    if ! curl -fkL --retry 2 -o "$tmpdir/firmware-util.sh" https://mrchromebox.tech/firmware-util.sh; then
+      echo "ERROR: Download failed. Check your internet connection."
+      rm -rf "$tmpdir"
+      pause
+      return
+    fi
+  fi
+
+  # 5. Verify the downloaded file is a valid bash script and not an HTML error page
+  if [ ! -s "$tmpdir/firmware-util.sh" ] || ! head -n 1 "$tmpdir/firmware-util.sh" | grep -q "^#!/bin/bash"; then
+    echo "ERROR: Downloaded file is empty or corrupted."
     rm -rf "$tmpdir"
     pause
     return
   fi
+  echo "OK: Script integrity verified."
+
+  # 6. Launch MrChromebox utility
+  echo
   echo "Starting MrChromebox Firmware Utility..."
-  sudo bash "$tmpdir/firmware-util.sh"
+  echo "-> Choose Option 2: Install/Update UEFI (Full ROM) Firmware"
+  echo "-> Follow the prompts to back up your stock firmware to a USB drive."
+  printf "2\nY\nI ACCEPT\nN\n" | sudo bash "$tmpdir/firmware-util.sh"
   status=$?
   rm -rf "$tmpdir"
+
+  # 7. Post-execution verification
   echo
+  echo "========== POST-EXECUTION CHECK =========="
   echo "MrChromebox utility exited with status $status."
+  if [ "$status" -eq 0 ]; then
+    fw_type="$(sudo crossystem mainfw_type 2>/dev/null)"
+    echo "Current mainfw_type: ${fw_type:-UEFI/non-ChromeOS}"
+    echo "If you flashed Full ROM, select Reboot/Power Off from the menu or run 'sudo reboot'."
+  else
+    echo "Check /tmp/mrchromebox_diag.txt or /tmp/mrchromebox_latest.log for troubleshooting details."
+  fi
   pause
 }
+
 
 
 usb_boot_menu() {
