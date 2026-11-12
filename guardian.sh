@@ -3,7 +3,7 @@
 # Owner-operated utility for ChromeOS devices in Developer Mode.
 
 set -u
-VERSION="1.3"
+VERSION="1.4"
 
 pause() {
   echo
@@ -135,6 +135,27 @@ set_vt2_password() {
   pause
 }
 
+
+explode_menu() {
+  local answer
+  echo
+  echo "========== EXPLODE =========="
+  echo "This is a placeholder for a future command."
+  echo "No command will run and no changes will be made in this version."
+  echo
+  read -r -p "Confirmation 1/3 - Do you understand this feature is unfinished? [y/N]: " answer
+  case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; pause; return ;; esac
+  read -r -p "Confirmation 2/3 - Are you sure you want to continue? [y/N]: " answer
+  case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; pause; return ;; esac
+  read -r -p "Confirmation 3/3 - Type EXPLODE to confirm: " answer
+  if [ "$answer" != "EXPLODE" ]; then echo "Cancelled."; pause; return; fi
+
+  # TODO: Add the intended command here only after its purpose and safety are clear.
+  echo
+  echo "Placeholder reached. No command is configured."
+  pause
+}
+
 safety_information() {
   echo
   echo "========== SAFETY & LIMITATIONS =========="
@@ -160,17 +181,17 @@ main_menu() {
     echo "  3. Launch MrChromebox Firmware Utility"
     echo "  4. Set / Change VT-2 Developer Password"
     echo "  5. Safety & Limitations"
-    echo "  6. Exit"
+    echo "  6. Explode"\n    echo "  7. Exit"
     echo "=========================================="
     echo
-    read -r -p "Select an option [1-6]: " choice
+    read -r -p "Select an option [1-7]: " choice
     case "$choice" in
       1) show_device_info; pause ;;
       2) usb_boot_menu ;;
       3) launch_mrchromebox ;;
       4) set_vt2_password ;;
       5) safety_information ;;
-      6) echo "Chromebook Guardian closed."; exit 0 ;;
+      6) explode_menu ;;\n      7) echo "Chromebook Guardian closed."; exit 0 ;;
       *) echo "Invalid selection."; sleep 1 ;;
     esac
   done
