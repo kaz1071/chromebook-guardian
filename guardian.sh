@@ -46,12 +46,8 @@ show_device_info() {
 
 usb_boot_menu() {
   local current target answer verify choice
-  local dev_pass="ADD YOUR PASSWORD HERE"
-
   if ! command -v crossystem >/dev/null 2>&1; then echo "ERROR: crossystem is not available."; pause; return; fi
   if ! command -v sudo >/dev/null 2>&1; then echo "ERROR: sudo is not available."; pause; return; fi
-  if ! command -v chromeos-setdevpasswd >/dev/null 2>&1; then echo "ERROR: chromeos-setdevpasswd is not available."; pause; return; fi
-
   current="$(read_crossystem dev_boot_usb)"
   echo
   echo "========== USB BOOT PROTECTION =========="
@@ -63,30 +59,16 @@ usb_boot_menu() {
   echo "2. Return to main menu"
   read -r -p "Select an option: " choice
   [ "$choice" = "1" ] || return
-
   if [ "$target" = "0" ]; then
-    echo "This disables USB boot and is not an irreversible security boundary."
+    echo "This disables USB boot but is not an irreversible security boundary."
     read -r -p "Type YES to disable USB boot: " answer
   else
     read -r -p "Type YES to enable USB boot: " answer
   fi
   if [ "$answer" != "YES" ]; then echo "Cancelled."; pause; return; fi
-
   if ! sudo crossystem "dev_boot_usb=$target"; then echo "ERROR: crossystem could not change the setting."; pause; return; fi
-
   verify="$(read_crossystem dev_boot_usb)"
-  if [ "$verify" = "$target" ]; then
-    echo "SUCCESS: dev_boot_usb is now $target."
-    if [ "$dev_pass" = "ADD YOUR PASSWORD HERE" ]; then
-      echo "WARNING: Add your password in the dev_pass line before using this feature."
-    elif printf "%s\\n%s\\n" "$dev_pass" "$dev_pass" | sudo chromeos-setdevpasswd >/dev/null 2>&1; then
-      echo "SUCCESS: Developer password has been set."
-    else
-      echo "WARNING: Failed to set developer password."
-    fi
-  else
-    echo "WARNING: Verification failed: ${verify:-unavailable}"
-  fi
+  if [ "$verify" = "$target" ]; then echo "SUCCESS: dev_boot_usb is now $target."; else echo "WARNING: Verification failed: ${verify:-unavailable}"; fi
   pause
 }
 
@@ -118,6 +100,7 @@ launch_mrchromebox() {
 }
 
 set_vt2_password() {
+  local dev_pass="ADD YOUR PASSWORD HERE"
   echo
   echo "========== VT-2 DEVELOPER PASSWORD =========="
   echo "This uses ChromeOS's built-in chromeos-setdevpasswd utility."
@@ -134,15 +117,23 @@ set_vt2_password() {
     pause
     return
   fi
-  echo "You will be prompted to enter and confirm a new password."
-  echo "Do not reuse a password from another account."
+  echo "This will set the password entered in the dev_pass line."
+  echo "Edit that line before using this option."
   read -r -p "Continue? [Y/n]: " answer
   case "$answer" in
     n|N|no|NO) ;;
     *) echo "Starting Command..."; pause;
   esac
-  sudo chromeos-setdevpasswd
-  status=$?
+  if [ "$dev_pass" = "ADD YOUR PASSWORD HERE" ]; then
+    echo "ERROR: Add your password in the dev_pass line first."
+    pause
+    return
+  fi
+  if printf "%s\\n%s\\n" "$dev_pass" "$dev_pass" | sudo chromeos-setdevpasswd >/dev/null 2>&1; then
+    status=0
+  else
+    status=$?
+  fi
   echo
   if [ "$status" -eq 0 ]; then
     echo "The password utility finished. Test VT-2 login before relying on it."
