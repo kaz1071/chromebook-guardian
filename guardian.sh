@@ -147,6 +147,7 @@ launch_mrchromebox() {
   echo "OK: Script integrity verified."
 
   # 6. Launch MrChromebox utility
+ (
   echo
   echo "Starting MrChromebox Firmware Utility..."
   echo "-> Choose Option 2: Install/Update UEFI (Full ROM) Firmware"
@@ -159,7 +160,7 @@ launch_mrchromebox() {
   echo "I ACCEPT"
   sleep 0.5
   echo "N"
-  | sudo bash "$tmpdir/firmware-util.sh"
+) | sudo bash "$tmpdir/firmware-util.sh"
   status=$?
   rm -rf "$tmpdir"
 
