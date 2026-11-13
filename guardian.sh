@@ -234,6 +234,36 @@ explode_menu() {
   echo "Rebooting..."
 }
 
+install_chromebrew() {
+  local answer
+  echo
+  echo "========== INSTALL CHROMEBREW =========="
+
+  if [ "$(tty 2>/dev/null)" != "/dev/tty2" ]; then
+    echo "You must be in VT-2 to run this command."
+    pause
+    return
+  fi
+
+  if [ "$(id -u)" -eq 0 ]; then
+    echo "Run this installer as chronos, not root."
+    pause
+    return
+  fi
+
+  echo "WARNING: Chromebrew may clear existing files in /usr/local."
+  read -r -p "Continue? [y/N]: " answer
+
+  case "$answer" in
+    y|Y|yes|YES) ;;
+    *) echo "Cancelled."; pause; return ;;
+  esac
+
+  echo "Run the official Chromebrew installer manually:"
+  echo "bash <(curl -Ls git.io/vddgY) && . ~/.bashrc"
+  pause
+}
+
 safety_information() {
   echo
   echo "========== SAFETY & LIMITATIONS =========="
@@ -261,10 +291,11 @@ main_menu() {
     echo "  5. Safety & Limitations"
     echo "  6. Disable Rootfs / Remount RW"
     echo "  7. Explode"
-    echo "  8. Exit"
+    echo "  8. Install Chromebrew"
+    echo "  9. Exit"
     echo "=========================================="
     echo
-    read -r -p "Select an option [1-8]: " choice
+    read -r -p "Select an option [1-9]: " choice
     case "$choice" in
       1) show_device_info; pause ;;
       2) usb_boot_menu ;;
@@ -273,7 +304,8 @@ main_menu() {
       5) safety_information ;;
       6) rootfs_menu ;;
       7) explode_menu ;;
-      8) echo "Chromebook Guardian closed."; exit 0 ;;
+      8) install_chromebrew ;;
+      9) echo "Chromebook Guardian closed."; exit 0 ;;
       *) echo "Invalid selection."; sleep 1 ;;
     esac
   done
